@@ -11,18 +11,20 @@ from docx.shared import Pt, RGBColor
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from docx.text.paragraph import Paragraph
+from bs4 import BeautifulSoup
 
-
-
-
+import requests
+import json
 
 class ResumeAtsKiller(App[None]):
     
+    FirefoxUA = "Mozilla/5.0 (X11; Linux i686; rv:136.0) Gecko/20100101 Firefox/136.0"
+
     
     #CSS_PATH = "app.tcss"
     JobDescriptionURL = None
     GotNewSkillsList = False
-    
+    DescriptionFetched = False
     
     CSS_PATH = "app.tcss"
     
@@ -223,7 +225,7 @@ class ResumeAtsKiller(App[None]):
                 
                 skillsParagraph = None
                 previousFormatting = None
-                
+                is_in_skills_section = False
                
                 for para in usersOldResume.paragraphs:
                     # grab formatting from template...
@@ -279,7 +281,27 @@ class ResumeAtsKiller(App[None]):
         if event.button.id == "FetchJobDescription":
             #self.notify(JobDescriptionURL)
             self.JobDescriptionURL= self.query_one("#JobURL", Input).value
-            self.notify(self.JobDescriptionURL)
+            self.notify("Attempting to fetch job description...")
+            
+            url = self.JobDescriptionURL.strip()
+            
+            # try and be sneaky-beaky. nooooo~ were definitely not a bot...
+            headers = requests.utils.default_headers()
+            
+            headers.update ({
+                'User-Agent': self.FirefoxUA
+            })
+            
+            if self.JobDescriptionURL.startswith('http://') or self.JobDescriptionURL.startswith('https://'):
+                response = requests.get(url, headers=headers)
+                response.raise_for_status()
+                
+                soup = BeautifulSoup(response.content, 'html.parser')
+                text = soup.get_text(separator='\n', strip=True)
+                self.notify(text)
+            else:
+                self.notify("Please Use a valid URL...", severity='error')
+            
         if event.button.id == "openFile" and self.JobDescriptionURL is not None:
             self.open_a_file()
         if event.button.id == "openFile" and self.JobDescriptionURL is None: self.notify('Must submit job description URL first!', severity='error')

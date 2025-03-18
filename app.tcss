@@ -14,11 +14,10 @@ TimeDisplay {
 
 Button {
     width: 16;
+    margin: 1;
 }
 
-#openFile {
-    dock: left;
-}
+
 
 #stop {
     dock: left;
@@ -27,4 +26,12 @@ Button {
 
 #reset {
     dock: right;
+}
+
+#FetchJobDescription {
+    dock: right;
+}
+
+#openFile {
+
 }

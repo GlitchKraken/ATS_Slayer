@@ -14,18 +14,20 @@ from docx.text.paragraph import Paragraph
 
 
 
-JobDescriptionURL = None
 
 
 class ResumeAtsKiller(App[None]):
     
     
     #CSS_PATH = "app.tcss"
+    JobDescriptionURL = None
+    GotNewSkillsList = False
     
     
+    CSS_PATH = "app.tcss"
     
     def compose(self) -> ComposeResult:
-        yield Input(placeholder='Job Description URL Here...')
+        yield Input(placeholder='Job Description URL Here...', type="text", id="JobURL")
         yield Button("Submit URL", id="FetchJobDescription", variant="success")
         yield Button("Select your resume", id="openFile", variant="primary",)
         yield Label()
@@ -214,7 +216,6 @@ class ResumeAtsKiller(App[None]):
                 
                 FoundSkillSection = False
                 
-                is_in_skills_section = False
                 
 
                 # add the bullet style in case the user has that one weird issue where you cant check the doc style
@@ -265,13 +266,23 @@ class ResumeAtsKiller(App[None]):
     #@on(Button.Pressed)
     #@work
     
+    @on(Input.Changed)
+    def saveURL(self, event: Input.Changed) -> None:
+        JobDescriptionURL = Input._value
+    @work
+    async def open_a_file(self) -> None:
+        if opened := await self.push_screen_wait(FileOpen()):
+            self.parseResume(opened)
+    
     def on_button_pressed(self, event: Button.Pressed) -> None:
         # only let the user upload their resume once they've entered a job site description...
-        if event.button.id == "openFile" and JobDescriptionURL is not None:
-            async def open_a_file(self) -> None:
-                if opened := await self.push_screen_wait(FileOpen()):
-                    self.parseResume(opened)
-        else: self.notify('Must submit job description URL first!', severity='error')
+        if event.button.id == "FetchJobDescription":
+            #self.notify(JobDescriptionURL)
+            self.JobDescriptionURL= self.query_one("#JobURL", Input).value
+            self.notify(self.JobDescriptionURL)
+        if event.button.id == "openFile" and self.JobDescriptionURL is not None:
+            self.open_a_file()
+        if event.button.id == "openFile" and self.JobDescriptionURL is None: self.notify('Must submit job description URL first!', severity='error')
             
 
 

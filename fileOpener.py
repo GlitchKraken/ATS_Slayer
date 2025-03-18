@@ -23,6 +23,8 @@ from re_gpt import SyncChatGPT
 class ResumeAtsKiller(App[None]):
     
     FirefoxUA = "Mozilla/5.0 (X11; Linux i686; rv:136.0) Gecko/20100101 Firefox/136.0"
+    
+    prompt = "given a job description, could you give me a list of skills in a python-friendly format that would be the perfect match for the job?"
 
     
     #CSS_PATH = "app.tcss"
@@ -39,7 +41,23 @@ class ResumeAtsKiller(App[None]):
         yield Label()
         yield Header()
         
+    
+    
+    #############################################################
+    #TODO:   This should be a function which
+    #        scans the users entire resume for keywords typically
+    #        tied to header names ("skills", "education", "employment")
+    #        and automagically converts each paragraph containing one of these INTO
+    #        a header, for easier processing later.
+    #        Ideally, this function would be called before the other processing in parse_resume
         
+    def convertToHeaders(self, resume) -> None:
+        pass
+    
+    ############################################################
+    
+    
+    
     def add_custom_bullet_style(self, doc):
         styles = doc.styles
         

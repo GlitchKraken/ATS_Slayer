@@ -16,6 +16,10 @@ from bs4 import BeautifulSoup
 import requests
 import json
 
+import asyncio
+
+from re_gpt import SyncChatGPT
+
 class ResumeAtsKiller(App[None]):
     
     FirefoxUA = "Mozilla/5.0 (X11; Linux i686; rv:136.0) Gecko/20100101 Firefox/136.0"
